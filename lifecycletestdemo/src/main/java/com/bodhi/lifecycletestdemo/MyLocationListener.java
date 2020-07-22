@@ -12,15 +12,25 @@ import androidx.lifecycle.OnLifecycleEvent;
  * @author : Sun
  * @version : 1.0
  * @time : 2020/7/20
- * desc :LifecycleOwner - LifecycleObserver 观察者模式对Activity声明周期进行监听
+ * desc :LifecycleOwner - LifecycleObserver 观察者模式对Activity/Fragment生命周期进行监听
  */
 class MyLocationListener implements LifecycleObserver {
-    private static final String TAG = "lifecycle";
+    private static final String TAG = "lifeTag";
 
     public MyLocationListener(Activity context,OnLocationChangedListener onLocationChangedListener){
-        Log.d(TAG,"initLocationManager");
+        Log.e(TAG,"initLocationManager");
         //初始化操作
 //        initLocationManager();
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private void onCreate(){
+        Log.e(TAG,"Activity onCreate");
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private void onStart(){
+        Log.e(TAG,"Activity onStart");
     }
 
     /**
@@ -28,7 +38,7 @@ class MyLocationListener implements LifecycleObserver {
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private void startGetLocation(){
-        Log.d(TAG,"startGetLocation");
+        Log.e(TAG,"Activity onResume startGetLocation");
     }
 
 
@@ -37,7 +47,17 @@ class MyLocationListener implements LifecycleObserver {
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private void stopGetLocation(){
-        Log.d(TAG,"stopGetLocation");
+        Log.e(TAG,"Activity onPause stopGetLocation");
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    private void onStop(){
+        Log.e(TAG,"Activity onStop");
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    private void onDestory(){
+        Log.e(TAG,"Activity onDestory");
     }
 
     /**

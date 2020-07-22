@@ -1,3 +1,5 @@
+//include ':ylyun-android-sdk_demo'
+include ':navigationtestdemo'
 include ':lifecycletestdemo'
 include ':app'
 rootProject.name = "JetpackTestDemo"
