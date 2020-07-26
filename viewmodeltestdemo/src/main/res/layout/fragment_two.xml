@@ -9,6 +9,16 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_centerInParent="true"
+        android:layout_above="@+id/seekBar"
+        android:text="TwoFragment" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:max="100"
+        android:layout_centerInParent="true"/>
 
 </FrameLayout>

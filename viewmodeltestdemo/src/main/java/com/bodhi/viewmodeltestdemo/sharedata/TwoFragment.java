@@ -3,10 +3,15 @@ package com.bodhi.viewmodeltestdemo.sharedata;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 
 import com.bodhi.viewmodeltestdemo.R;
 
@@ -61,6 +66,39 @@ public class TwoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_two, container, false);
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_one, container, false);
+        final SeekBar seekBar = view.findViewById(R.id.seekBar);
+
+        ShareDataViewModel shareDataViewModel = new ViewModelProvider(getActivity()).get(ShareDataViewModel.class);
+        final MutableLiveData<Integer> liveData = shareDataViewModel.getProgress();
+        liveData.observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                Log.e("lifeNum","TwoFragment   onChanged:"+integer);
+                seekBar.setProgress(integer);
+            }
+        });
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.e("lifeNum","TwoFragment   onProgressChanged:"+progress);
+                //当用户操作SeekBar时，更新ViewModel中的数据
+                liveData.setValue(progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        return view;
     }
 }

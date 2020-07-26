@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,15 +70,33 @@ public class OneFragment extends Fragment {
         final SeekBar seekBar = view.findViewById(R.id.seekBar);
 
         ShareDataViewModel shareDataViewModel = new ViewModelProvider(getActivity()).get(ShareDataViewModel.class);
-        MutableLiveData<Integer> liveData = shareDataViewModel.getProgress();
+        final MutableLiveData<Integer> liveData = shareDataViewModel.getProgress();
         liveData.observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
+                Log.e("lifeNum","OneFragment   onChanged:"+integer);
                 seekBar.setProgress(integer);
             }
         });
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.e("lifeNum","OneFragment   onProgressChanged:"+progress);
+                //当用户操作SeekBar时，更新ViewModel中的数据
+                liveData.setValue(progress);
+            }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         return view;
     }
