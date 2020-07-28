@@ -1,3 +1,4 @@
+include ':workmanagertestdemo'
 include ':roomtestdemo'
 include ':viewmodeltestdemo'//include ':ylyun-android-sdk_demo'
 include ':navigationtestdemo'
