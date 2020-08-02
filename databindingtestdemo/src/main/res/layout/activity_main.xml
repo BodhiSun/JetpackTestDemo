@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    
+    <data>
+        <variable
+            name="book"
+            type="com.bodhi.databindingtestdemo.Book" />
+        <import type="com.bodhi.databindingtestdemo.BookRatingUtil"/>
+
+        <variable
+            name="EventHandler"
+            type="com.bodhi.databindingtestdemo.EventHandleListener" />
+
+        <variable
+            name="networkImage"
+            type="String" />
+
+        <variable
+            name="localImage"
+            type="int" />
+
+        <variable
+            name="imagePadding"
+            type="int"/>
+
+        <variable
+            name="ClickHandler"
+            type="com.bodhi.databindingtestdemo.MainActivity.ClickHandler" />
+
+        
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:id="@+id/tvBookName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{book.name}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvBookAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{book.author}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvBookRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{BookRatingUtil.getRatingString(book.rating)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{EventHandler::onButtonClicked}"
+            android:text="Click me to Login"/>
+
+
+        <!--将数据传递给二级页面-->
+        <include layout="@layout/layout_content"
+            app:book="@{book}"/>
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:image="@{networkImage}"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:image="@{localImage}"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:image="@{networkImage}"
+                app:defaultImageResource="@{localImage}"
+                app:padding="@{imagePadding}"/>
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="change padding"
+                android:onClick="@{ClickHandler::onClick}"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</layout>
