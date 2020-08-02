@@ -1,8 +1,11 @@
 package com.bodhi.databindingtestdemo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.Toast;
+
+import com.bodhi.databindingtestdemo.login.LoginActivity;
 
 /**
  * @author : Sun
@@ -19,6 +22,8 @@ public class EventHandleListener {
 
     public void onButtonClicked(View view){
         Toast.makeText(context,"I am clicked!",Toast.LENGTH_SHORT).show();
+        Context context = view.getContext();
+        context.startActivity(new Intent(context, LoginActivity.class));
     }
 
 
