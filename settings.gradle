@@ -1,3 +1,4 @@
+include ':mvvmgithub'
 include ':pagingtestdemo'
 include ':databindingtestdemo'
 include ':workmanagertestdemo'
