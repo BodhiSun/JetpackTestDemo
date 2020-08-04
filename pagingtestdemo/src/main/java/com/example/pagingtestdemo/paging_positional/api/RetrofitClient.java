@@ -1,4 +1,4 @@
-package com.example.pagingtestdemo.api;
+package com.example.pagingtestdemo.paging_positional.api;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    private static final String BASE_URL = "http://api.douban.com/v2/";
+    private static final String BASE_URL = "https://api.douban.com/v2/";
 
     private static final String API_KEY = "0b2bdeda43b5688921839c8ecb20399b";
 

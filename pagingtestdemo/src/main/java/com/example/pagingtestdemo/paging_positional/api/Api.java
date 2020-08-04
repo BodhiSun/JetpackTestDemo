@@ -1,6 +1,6 @@
-package com.example.pagingtestdemo.api;
+package com.example.pagingtestdemo.paging_positional.api;
 
-import com.example.pagingtestdemo.model.Movies;
+import com.example.pagingtestdemo.paging_positional.model.Movies;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
