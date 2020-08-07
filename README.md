@@ -66,6 +66,30 @@ liveData.observeForever()方法可以使页面不管处于何种状态下都能�
 
 #### 5. Room:
 作为Android官方的ORM数据库，与其他开源的ORM库一样都是在Sqlite基础上做进一步封装，目的是简化Sqlite操作数据库代码编写的复杂度，可以方便的对数据库进行创建、升级、CRUD表。
+##### Room主要包含如下元素：
+###### @Entity注解
+定义一个模型类并在类上方添加@Entity注解，表示此类对应数据库中一张表，可在注解内设置tableName值即表的名字，不设置默认表名和类名相同，与@Entity配合使用的是修饰成员变量的@ColumnInfo
+注解，表示表中的字段，注解内可设置name值表示字段名，同样不设置默认为成员变量名，设置typeAffinity值表示字段类型，此外还有@PrimaryKey注解表示此字段为主键，注解内的autoGenerate值表示自增，@NonNull注解表示此字段非空，@Ignore注解表示告诉Room忽略该字段或方法。
+###### @Dao注解
+定义一个接口并在接口上方添加@Dao注解，表示此接口为操作Entity表的Dao(Data Access Objects)对象，一个Entity表对应一个Dao对象，主要用于对表进行CRUD。Dao对象是在数据库初始化时通过数据
+库声明类的抽象方法获得的。与@Dao注解配合使用的是修饰接口方法的@Insert、@Delete、@Update、@Query增删改查注解，@Query注解内要写上查询语句 eg @Query("SELECT * FROM 表名")，@Insert和
+@Update注解内可设置onConflict值表示当出现冲突时的处理策略，默认为OnConflictStrategy.ABORT即终止并回滚事务，此外增删改方法需要声明表对象为参数。同时Room原生支持与LiveData组件配合，查询方法的返回值除了Entity修饰的表对象外，还可以为LiveData<List<Entrity修饰对象>>,这样ViewMode+LiveData 包装Dao对象查询数据库的结果后，当数据库数据发生变化不用再重复查询，页面直接能收到数据变化的通知。Excellent!!
+###### @Database注解
+自定义一个继承RoomDatabase的抽象类并在类上方添加@Database注解，表示此类为数据库对象，注解内可设置entities值用于声明数据库中包含哪些表，多个表可用{表类.class,表类.class}括起来，设置version值表示数据库版本，exportSchema值表示是否导出数据库信息 默认为true。   
+数据库对象的实例化要通过Room对象获得，首先声明一个公有的获得数据库对象的方法，一般为单例模式，在方法内通过Room.databaseBuilder(applicationContext(),数据库对象.class, 数据库名字).build()获得数据库对象实例，在获得RoomDatabase.Builder对象后还可以追加一些额外的配置，eg .addMigrations(new Migration(数据库老版本号,数据库新版本号),策略2)配置数据库升级策略 .fallbackToDestructiveMigration()配置升级异常时处理策略，代表没有对应版本间的升级方案时不让程序崩溃但是数据会丢失 即重新创建数据表 .createFromAsset("本地现有数据库.db")配置以现有数据库生成Room数据库 用于预填充数据。最后在类内部声明一个公有的抽象方法，用来返回操作表的Dao对象。然后就可以在ViewModel中先获得Database对象，再获得Dao对象，进而在子线程中通过Dao对象调用Dao中定义的操作数据库表的增删改查方法。    
+@Database注解中exportSchema表示是否导出数据库信息，但是需要在gradle文件中指定输出路径，数据库生成修改成功就可以在对应目录下看到生成的 数据库版本号.json文件了。   
+android{ defaultConfig{ javaCompileOptions{ annotationProcessorOptions{ arguments = ["room.schemaLocation":"model名字/schemas".toString()]}}}}
+
+#### 6. WorkManager:
+WorkManager为了解决后台任务，并且是不需要立刻完成，当达到规定的条件时自动触发的 兼容范围非常广的异步任务处理组件，目的是控制后台任务以达到节省电量提升用户体验。不需要立即完成的任务比如日志上报、同步应用数据、静默下载更新包等。   
+WorkManager根据当前设备的系统版本自动选择不同的执行方式，当设备系统版本>=23时采用JobScheduler完成任务，当系统版本<23时采用AlarmManager+Broadcast Receivers完成任务，但最终任务都是由Executor执行的。
+WorkManager使用方法先创建一个继承Worker的自定义类，表示即将要执行的任务，实现相关方法并在doWork方法内执行具体耗时任务，可以通过getInputData()接收外面传入进来的数据，并在任务执行完返回Result.failure() Result.success() 或者Result.retry()。然后通过new Constraints.Builder().build()创建一个任务触发条件的约束对象，Builder可以配置的条件有eg .setRequiresCharging(true)需要设备正在充电 .setRequiredNetworkType(NetworkType.CONNECTED)需要设备连接网络 .setRequiresBatteryNotLow(true)需要设备电量充足等。在创建一个任务请求对象new OneTimeWorkRequest.Builder (自定义任务类.class).build(),请求对象Builder也可配置一些参数 eg .setConstraints(约束对象)设置任务触发的约束条件 .setInitialDelay(duration, timeUnit)设置满足条件后任务触发的延迟时间 .addTag(tag)为任务设置标签 .setInputData(Data)为任务类传入数据等。最后通过WorkManager  .getInstance(this).enqueue(workRequest)将配置好的任务提交给系统。可以通过workManager.cancel...()方法取消任务，可以通过workManager.getWorkInfoByTagLiveData(tag).
+.observe(this, new Observer<WorkInfo>() {...})方法观察任务状态 并可以在内部回调方法中通过workInfo获得Worker类回传回来的数据。   
+PeriodicWorkRequest周期性任务和OneTimeWorkRequest一次性任务使用配置一样，但是周期间隔不能小于15分钟。    
+当存在多个任务的情况下,可以通过workManager.beginWith(workRequestA).then(workRequestB).enqueue()将两个任务构建成一个任务链，begin会优先于then执行。
+
+
+
 
 
 
