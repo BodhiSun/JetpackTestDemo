@@ -87,6 +87,18 @@ WorkManager使用方法先创建一个继承Worker的自定义类，表示即将
 .observe(this, new Observer<WorkInfo>() {...})方法观察任务状态 并可以在内部回调方法中通过workInfo获得Worker类回传回来的数据。   
 PeriodicWorkRequest周期性任务和OneTimeWorkRequest一次性任务使用配置一样，但是周期间隔不能小于15分钟。    
 当存在多个任务的情况下,可以通过workManager.beginWith(workRequestA).then(workRequestB).enqueue()将两个任务构建成一个任务链，begin会优先于then执行。
+  
+#### 7. DataBinding:
+DataBinding可以将数据模型直接声明到xml布局文件中，然后在UI控件上把模型中的属性直接赋值到控件的数据属性上，然后在页面Activity/Fragment中通过将具体的模型对象设置给布局文件，当页面中的模型对象数据变化时，布局上控件的数据显示也会自动变化，这就是DataBinding最主要的功能，此外它还支持双向绑定，即通过更改UI控件的显示，自动修改页面中模型的数据。   
+
+DataBinding让布局承担了部分页面的功能，使xml布局和页面Activity之间更加解耦，减轻了页面的工作量。同时DataBinding也为能够更好的实现MVVM架构提供了基础。   
+
+首先在build.grdle中通过android{dataBinding{enabled = true}}配置开启DataBinding功能，然后创建普通的数据模型类，接着到布局文件中将布局根标签更改为layout,然后整个layout标签内可分为两部分，一部分为原本的布局构建代码放在一个大的布局标签内，一部分为数据代码放到data标签内，在data标签内可以通过variable标签声明一个变量，name代表变量名，type代表变量类型，可以为基本数据类型或是引用数据类型，如果引用数据类型是自定义类要写上类的全路径。data标签内还可以通过import标签导入一个自定义类，注意如果是用variable声明的代表此变量是一个对象，需要在Activity中设置对应的对象值进来，如果是import则代表引入的是一个类，可以在xml布局文件内直接调用此类的静态成员变量或方法。控件使用声明的数据时需要用@{}将java代码包裹起来，比如设置一个TextView控件的文本显示，则直接在text属性上写@{model对象.属性}。最后回到Activity页面中将原本的setContentView方法移除，用DataBindingUtil. 
+setContentView(this,R.layout.xxx)方法代替，此时同步一下项目DataBinding会自动生成Activity类名倒过来并拼接上Binding字符的辅助类。用此类接收
+DataBindingUtil.setContentView()的方法作为返回值类型，通过该辅助类对象的set变量名方法将数据模型对象设置给布局文件，DataBinding基本用法变掌握完毕。   
+
+
+
 
 
 
