@@ -111,6 +111,34 @@ DataBinding双向绑定有两种实现方式，第一种自定义一个类并继
 DataBinding也可用在RecyclerView的item布局中，修改item布局引入数据对象作为布局变量，并将变量的属性值作用于布局中的UI控件，在Adapter的onCreateViewHolder方法中通过DataBindingUtil
 引入item布局并返回ViewDataBinding对象，用ViewDataBinding对象实例化ViewHolder对象，将ViewDataBinding对象声明为ViewHolder的成员变量以便给item布局设置数据，接着在onBindViewHolder方法中 根据position获取到指定对象数据后，通过holder.viewDataBinding对象将数据设置到布局中，即DataBinding在RecyclerView中的使用方式。
 
+#### 8. Paging:
+正如它的名字一样，Paging组件的功能就是为了完成分页加载，并且为常见的几种分页机制提供了统一方案。    
+
+##### Paging主要包含如下几个类：
+
+###### PagedListAdapter
+将RecyclerView的Adapter从原来的RecyclerView.Adapter改为继承PagedListAdapter<T, VH> 实现构造方法，并在类内容声明一个DiffUtil.ItemCallback对象用于计算两个数据列表之间的差异，其中要实现两个方法，第一个方法areItemsTheSame用于检测两个对象是否代表同一个item，eg 可以依据具体的业务规则比如item.id作为比较依据 oldItem.id.equals(newItem.id),第二个方法用来检测两个item内容是否一样areContentsTheSame 也可依据具体的业务规则或者直接oldItem.equals(newItem)。声明完DiffUtil.ItemCallback 则将它在构造方法中以super(diffCallback)形式返回给父类即可。同时在Activity中当获取到DataSource返回的数据后 通过PagedListAdapter的submitList方法将数据设置到adapter中。
+###### PagedList
+首先它是一个数据集合用来存放从DataSource中获取的数据，并且它可以通过配置通知DataSource提前多少条开始加载下一个数据、第一页加载多少数据，每页加载多少条数据等。通常将PagedList用
+LiveData包装起来声明到ViewModel中，并在ViewModel中完成对LiveData<PagedList<模型对象>>的初始化，初始化需要先通过new PagedList.Config.Builder()... .build()方法实例化一个config对象并完成PagedList的相关配置，然后通过new LivePagedListBuilder<>(new  DataSource.Factory<Key, Value>(){...},config对象).build()完成初始化，以供外部使用并观察数据变化。PagedList的常用配置有config.stEnablePlaceholders是否开启item占位,config.setPageSize每页大小通常与DataSource中请求数据的参数保持一致,config.setPrefetchDistance距离底部多少条数据时开始加载下一页,config.setInitialLoadSizeHint首次加载数据的数据量PageSize的整倍数,config.setMaxSize PageList所能承受的最大数量.
+###### DataSource
+DataSource主要负责从网络或者room数据库中获取数据，执行具体的数据载入工作,并用来构建DataSource.Factory对象，即在DataSource.Factory的create方法中直接实例化一个DataSource对象 并返回即可。根据分页机制的不同Paging一共提供了三种DataSource。     
+1).PositionalDataSource   
+适用于在目标数据源数据量固定的情况下，且从任意位置开始往后取固定条数的分页机制。通常服务器需要两个参数start参数表示任意开始位置，count参数表示想后取count个数据。    
+自定义一个类并继承PositionalDataSource<T>，实现loadInitial方法首次加载第一页调用的方法，在通过网络库将数据请求成功后通过callback.onResult(服务返回的数据集合,start数据起始位置，服务器总数据量)将数据返回给PagedList。实现loadRange方法加载下一页时调用的方法，通过网络库请求成功后通过callback.onResult(服务返回的数据集合)将数据返回给PagedList，用网络库请求下一页时的start起始位置参数直接从此方法的LoadRangeParams参数params.startPosition获取即可，Paging内部会自己维护。  
+2).PageKeyedDataSource   
+适用于以页的方式进行请求数据的分页机制。服务器需要两个参数page表示请求第几页，pageSize表示一页多少条数据。   
+自定义一个类并继承PageKeyedDataSource<K,V>,实现loadInitial方法，数据请求成功后通过callback.onResult(服务返回的数据集合,previousPageKey,nextPageKey)将数据返回给PagedList，如没有前一页传null，下一页为当前请求的页码+1。实现loadAfter方法加载下一页调用该方法，请求的页码可从LoadParams参数params.key获得，在数据请求成功后通过callback.onResult(返回的数据集合,nextKey)将数据返回给PagedList。    
+3).ItemKeyedDataSource   
+适用于下一页数据需要依赖上一页数据最后一条数据的某个字段为key的分页机制。通常用于评论功能的实现，服务器需要两个参数since表示最后一个数据的key，pageSize表示向后加载多少条数据。  
+自定义一个类并继承ItemKeyedDataSource<K,V>,实现loadInitial方法和loadAfter方法，并在网络库请求成功后通过callback.onResult(返回的数据集合)将数据返回给PagedList。还需要实现一个
+getKey方法并根据具体业务，比如以数据id为key则返回 数据对象.id。
+
+###### BoundaryCallback
+适用于当应用程序需要缓存数据，程序数据源即来源于网络又来源于本地缓存的情况时，通过BoundaryCallback实现单一来源架构，以解决多数据源时效和新旧数据切换的问题，简化开发的复杂度。   
+BoundaryCallback整体流程：    
+首次加载页面如数据库有数据则直接将数据库数据返回给PageList进行渲染，如数据库为空首次加载数据会自动调用BoundaryCallback的onZeroItemsLoaded方法，在该方法内通过网络请求库加载数据，请求成功后将数据插入到room数据库中。当向上滑动页面加载下一页时，如数据库有下一页数据则直接将数据返回给PageList，如果数据库没有下一页数据会自动调用BoundaryCallback的onItemAtEndLoaded方法，方法内的参数为上一页最末尾的数据对象，在该方法内请求数据并在请求成功后将数据插入到room数据库。当向下滑动刷新数据时，首先手动清空数据库，由于数据库发生了变化数据库中没有数据了，PageList又会通知BoundaryCallback的onZeroItemsLoaded方法加载数据就回到了首次加载页面的状态。由于数据库是页面的唯一数据源，页面订阅了数据库的变化，所以当数据库中的数据发生变化时会直接反映到页面上。
+
 
 
 
