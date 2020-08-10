@@ -95,7 +95,25 @@ DataBinding让布局承担了部分页面的功能，使xml布局和页面Activi
 
 首先在build.grdle中通过android{dataBinding{enabled = true}}配置开启DataBinding功能，然后创建普通的数据模型类，接着到布局文件中将布局根标签更改为layout,然后整个layout标签内可分为两部分，一部分为原本的布局构建代码放在一个大的布局标签内，一部分为数据代码放到data标签内，在data标签内可以通过variable标签声明一个变量，name代表变量名，type代表变量类型，可以为基本数据类型或是引用数据类型，如果引用数据类型是自定义类要写上类的全路径。data标签内还可以通过import标签导入一个自定义类，注意如果是用variable声明的代表此变量是一个对象，需要在Activity中设置对应的对象值进来，如果是import则代表引入的是一个类，可以在xml布局文件内直接调用此类的静态成员变量或方法。控件使用声明的数据时需要用@{}将java代码包裹起来，比如设置一个TextView控件的文本显示，则直接在text属性上写@{model对象.属性}。最后回到Activity页面中将原本的setContentView方法移除，用DataBindingUtil. 
 setContentView(this,R.layout.xxx)方法代替，此时同步一下项目DataBinding会自动生成Activity类名倒过来并拼接上Binding字符的辅助类。用此类接收
-DataBindingUtil.setContentView()的方法作为返回值类型，通过该辅助类对象的set变量名方法将数据模型对象设置给布局文件，DataBinding基本用法变掌握完毕。   
+DataBindingUtil.setContentView()的方法作为返回值类型，通过该辅助类对象的set变量名方法将数据模型对象设置给布局文件，DataBinding基本用法变掌握完毕。
+
+在布局中有include方式导入其他布局的嵌套情况时，可以通过在include标签中app:variable中变量名="@{变量名}"将变量传递给对应的布局中，同时在对应布局中需要声明同名同类型的变量接收。   
+
+DataBinding也支持在布局中响应事件，首先定义一个类，在类中定义一个共有的以View做为入参的方法，方法内即为控件上事件触发后要执行的操作。将自定义类在布局文件中以variable标签的形式引入，在控件的对应事件上比如点击事件eg android:onClick="@{引入的自定义对象名::自定义对象内的方法}"，最后在Activity页面中通过binding对象的set对象名方法将自定义类传进去，通过以上步骤，当布局上的控件被点击时，就会自动调用自定义类中的声明的方法。    
+
+布局表达式中，我们通过@{对象.成员变量}的方式给控件的对应属性赋值，这样赋值之所以能有效的原因是DataBinding库为我们生成了大量的BindingAdapter类，几乎系统中常用UI控件它都为我们生成了绑定所需的BindAdapter类，通过查看对应UI控件的BindAdapter类源码，在控件可以改变的属性都有一个共有的静态方法与之对应，方法包含两个参数一个是UI控件一个是属性值，并在方法上方标注@BindingAdapter("要改变的属性")注解，所以DataBinding库是以静态方法的形式为UI控件的各个属性绑定了相应代码，当布局文件被渲染时，属性所绑定的方法会被自动调用。   
+仿照DataBinding库生成的绑定类我们也可以自定义BindingAdapter为控件自定义新的属性，以ImageView控件为例为它新增一个app:image属性，我们先创建一个类并定义一个包含两个参数的setImage共有静态方法，第一个参数ImageView 代表imageview控件，第二个参数为String 代表传入的图片地址，在方法体内通过下载图片并将图片展示到控件上，即完成了image属性的功能.最后在方法上方加上@BindingAdapter ("image")注解，然后到布局中在ImageView控件加上app:image="@{声明的对象.imageUrl}"即可，最后别忘了在Activity中为对象赋值。同时BindingAdapter内支持方法重载，也可以在定义一个接收int类型加载本地资源的方法，布局中使用时传入int类型的资源id即可。BindingAdapter还支持多参数方法重载，可以在方法内定义两个接收数据参数，对应的也要在方法上面的注解中声明多个属性，value={"属性1","属性2"}表示多个属性，requireAll=false值表示是否同时需要必传。多参数重载还有一个用法为可选旧值，如果是可选旧值方法上方注解同一个接收数据参数一样，只是写上对应属性即可，只是方法的参数中第一个接收数据参数表示旧值即更改之前原先此属性显示的值，第二个参数表示新值即将要改变最新传入进来的值，如之前无旧值时旧值为类型的初值。       
+     
+DataBinding双向绑定有两种实现方式，第一种自定义一个类并继承BaseObservable 然后给要支持双向绑定的属性添加get/set方法，并在get方法上面添加@Bindable注解，在set方法中修改完属性值后添加notifyPropertyChanged(BR.属性)方法，接着在xml布局文件中布局表达式由原来的@{}变为@={},eg EditText控件的text属性设置 android:text ="@={variable声明的对象.属性}"，这样当修改EditText的值时会自动调用自定义类中的set方法，当修改内存中对象数据时布局上EditText显示也会跟着变化。    
+第二中实现双向绑定的方式是使用ObservableField,这种实现方式更符合MVVM架构的设计。在ViewModel中用ObservableField<T>将要通信的对象包装起来即将普通对象包装成一个可观察的对象，然后通过new ObservableField<>()获得ObservableField对象，接着observableField.set(包装的对象)将ObservableField和包装的对象关联起来，最后在ViewModel中声明要实现双向绑定的属性的get/set方法并正常实现即可，其他布局和页面文件和第一种方式一样，observableField.get()方法可返回对象。    
+第二种方式相比于第一种方式不需要继承类，不需要写@Bindable注解，不需要手动调用notifyPropertyChanged()方法,更加方便和简洁。   
+     
+DataBinding也可用在RecyclerView的item布局中，修改item布局引入数据对象作为布局变量，并将变量的属性值作用于布局中的UI控件，在Adapter的onCreateViewHolder方法中通过DataBindingUtil
+引入item布局并返回ViewDataBinding对象，用ViewDataBinding对象实例化ViewHolder对象，将ViewDataBinding对象声明为ViewHolder的成员变量以便给item布局设置数据，接着在onBindViewHolder方法中 根据position获取到指定对象数据后，通过holder.viewDataBinding对象将数据设置到布局中，即DataBinding在RecyclerView中的使用方式。
+
+
+
+
 
 
 
