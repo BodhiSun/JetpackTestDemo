@@ -10,7 +10,7 @@
       
 组件导入：implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
    
-用法：
+不同环境用法：
 ###### Activity&Fragment   
 新版本Activity/Fragment中默认实现了LifeCycleOwner，所以自定义组件直接实现LifeCycleObserver接口即可，并在需要感知生命周期的方法上添加@OnLifecycleEvent(Lifecycle.Event.ON_XXX)注解,
 当页面声明周期发生变化会自动调用这些方法。最后在Activity/Fragment中通过调用getLifecycle().addObserver(xxx自定义组件类)，将观察者和被观察者绑定起来完成生命周期的检测。
@@ -77,7 +77,7 @@ LiveData本身相当于一个数据容器，并且是可被观察的数据容器
 
 组件导入：implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'   
 
-用法：
+用法：   
 由于LiveData是抽象类无法直接使用，我们可以使用它的直接子类MutableLiveData，在自定义ViewModel中定义MutableLiveData<数据>对象,并暴露对外获取的方法，在页面上通过ViewModelProvider获取
 自定义的ViewModel对象，然后通过暴露的方法获取MutableLiveData<数据>对象，最后通过liveData.observe(this, new Observer<Integer>() {...}获取实时变化的数据，也可以通过liveData.setValue()在UI线程更改liveData中包装的数据，或通过liveData.postValue()在非UI线程中更改数据。   
 liveData.observe()方法中第一个参数指的是LifecycleOwner，第二个参数是Observer，方法内部调用的是lifecycleOwner.getLifecycle().addObserver(lifecycleObserver)，将observer和页面的生命周期关联起来。所以liveData可以感知生命周期，在页面处于活动状态时才可以收到LiveData的数据变化通知，销毁状态下自动清除与页面的关联。   
