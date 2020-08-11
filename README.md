@@ -211,7 +211,7 @@ ViewModel层和Model层之间多了一个Repository存储区层，这是因为�
 ###### viewmodel：负责获取Repository层的数据 并包装返回给View层    
 ###### MainActivity：View层,使用了DataBinding组件将数据直接交给布局文件进行处理展示   
 ###### MyApplication：用于初始化数据和网络库对象
-
+###### 项目中Jetpack架构组合为：ViewModel+LiveData+DataBinding+Room
 
 
 
