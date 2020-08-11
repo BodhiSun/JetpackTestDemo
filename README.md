@@ -195,12 +195,14 @@ new LivePagedListBuilder<>(database.entry表dao().query对应方法,每页数据
 
 
 ## 二.MVVM项目架构
-<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/final-architecture.png" width="640" height="480" />
+<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/mvvm_architecture.png" width="640" height="480" />
 根据上面Google开发者官网给出架构图可以清晰的看到整个项目架构层次分明，每一层的职责清晰、明确,并且每个层级的组件仅依赖于其下一层的组件。例如，View层(Activity/Fragment)仅依赖于ViewModel视图模型层，视图模型层仅依赖于Repository存储区层，而存储区是唯一依赖于其他多个Model层类的类。    
    
 ViewModel层和Model层之间多了一个Repository存储区层，这是因为项目中通常需要考虑到缓存数据，所以数据即来源于持久性数据模型即本地数据库和又来源于远程后端数据源，增加一个存储区Repository层用来处理本地数据和网络数据之间的业务逻辑，让ViewModel层仅依赖于Repository提供数据，而不用关心数据的具体来源，这既是Repository存储区层的意义。   
 
-
+### 项目案例1：Github用户个人信息展示
+<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/github_userinfo.png" height="394" />
+<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/github_userinfo_architecture.png" height="394" />
 
 
 
