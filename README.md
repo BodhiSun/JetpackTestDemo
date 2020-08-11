@@ -33,16 +33,16 @@ implementation 'androidx.navigation:navigation-ui:2.1.0'
 
 ##### Navigation主要包含如下元素：
 
-**Navigation Graph**    
+###### Navigation Graph 
 它是一种新的xml类型的资源文件，需在res目录下创建navigation文件夹，然后在该文件夹右键New->Navigation Resource File创建根标签为navigation的xml文件。在该文件中添加所有的要切换fragment,
 配置activity初始显示fragment的app:startDestination属性,配置某个fragment跳转到另一个fragment的action动作标签(包含android:id动作id,app:destination跳转的目的地,enterAnim、exitAnim、
 popEnterAnim、popExitAnim跳转动画)。
 
-**NavHostFragment**    
+###### NavHostFragment
 它是一个在Activity的xml中配置的特殊的fragment,它相当于Navigation Graph中配置的其他fragment的容器。设置android:id属性，设置android:name="androidx.navigation.fragment.NavHostFragment"
 属性，设置app:defaultNavHost="true"属性(自动处理系统返回键)，设置app:navGraph="@navigation/xxx"属性指向创建的Navigation Graph。
 
-**NavController**    
+###### NavController  
 它是一个java对象，用于在Activity代码中对Fragment切换事件进行监听，用于在Fragment代码中实现Navigation Graph中配置有跳转逻辑action的具体切换工作。   
 Activity中监听fragment切换方法：Navigation.findNavController(this,NavHostFragment配置的id).addOnDestinationChangedListener(new NavController.OnDestinationChangedListener(){...})。   
 Fragment中切换动作实现：Navigation.findNavController(view).navigate(Navigation Graph配置的action id，跳转bundle参数);   
@@ -114,7 +114,9 @@ WorkManager根据当前设备的系统版本自动选择不同的执行方式，
 
 用法：   
 WorkManager使用方法先创建一个继承Worker的自定义类，表示即将要执行的任务，实现相关方法并在doWork方法内执行具体耗时任务，可以通过getInputData()接收外面传入进来的数据，并在任务执行完返回Result.failure() Result.success() 或者Result.retry()。   
+
 然后通过new Constraints.Builder().build()创建一个任务触发条件的约束对象，Builder可以配置的条件有eg .setRequiresCharging(true)需要设备正在充电 .setRequiredNetworkType(NetworkType.CONNECTED)需要设备连接网络 .setRequiresBatteryNotLow(true)需要设备电量充足等。在创建一个任务请求对象new OneTimeWorkRequest.Builder (自定义任务类.class).build(),请求对象Builder也可配置一些参数 eg .setConstraints(约束对象)设置任务触发的约束条件 .setInitialDelay(duration, timeUnit)设置满足条件后任务触发的延迟时间 .addTag(tag)为任务设置标签 .setInputData(Data)为任务类传入数据等。   
+
 最后通过WorkManager  .getInstance(this).enqueue(workRequest)将配置好的任务提交给系统。可以通过workManager.cancel...()方法取消任务，可以通过workManager.getWorkInfoByTagLiveData(tag).
 .observe(this, new Observer<WorkInfo>() {...})方法观察任务状态 并可以在内部回调方法中通过workInfo获得Worker类回传回来的数据。   
 PeriodicWorkRequest周期性任务和OneTimeWorkRequest一次性任务使用配置一样，但是周期间隔不能小于15分钟。    
@@ -146,6 +148,7 @@ BindingAdapter:
 DataBinding双向绑定有两种实现方式，第一种自定义一个类并继承BaseObservable 然后给要支持双向绑定的属性添加get/set方法，并在get方法上面添加@Bindable注解，在set方法中修改完属性值后添加notifyPropertyChanged(BR.属性)方法，接着在xml布局文件中布局表达式由原来的@{}变为@={},eg EditText控件的text属性设置 android:text ="@={variable声明的对象.属性}"，这样当修改EditText的值时会自动调用自定义类中的set方法，当修改内存中对象数据时布局上EditText显示也会跟着变化。    
 第二中实现双向绑定的方式是使用ObservableField,这种实现方式更符合MVVM架构的设计。在ViewModel中用ObservableField<T>将要通信的对象包装起来即将普通对象包装成一个可观察的对象，然后通过new ObservableField<>()获得ObservableField对象，接着observableField.set(包装的对象)将ObservableField和包装的对象关联起来，最后在ViewModel中声明要实现双向绑定的属性的get/set方法并正常实现即可，其他布局和页面文件和第一种方式一样，observableField.get()方法可返回对象。    
 第二种方式相比于第一种方式不需要继承类，不需要写@Bindable注解，不需要手动调用notifyPropertyChanged()方法,更加方便和简洁。   
+      
 RecyclerView中的用法：  
 DataBinding也可用在RecyclerView的item布局中，修改item布局引入数据对象作为布局变量，并将变量的属性值作用于布局中的UI控件，在Adapter的onCreateViewHolder方法中通过DataBindingUtil
 引入item布局并返回ViewDataBinding对象，用ViewDataBinding对象实例化ViewHolder对象，将ViewDataBinding对象声明为ViewHolder的成员变量以便给item布局设置数据，接着在onBindViewHolder方法中 根据position获取到指定对象数据后，通过holder.viewDataBinding对象将数据设置到布局中，即DataBinding在RecyclerView中的使用方式。
@@ -167,6 +170,7 @@ LiveData包装起来声明到ViewModel中，并在ViewModel中完成对LiveData<
 
 ###### DataSource
 DataSource主要负责从网络或者room数据库中获取数据，执行具体的数据载入工作,并用来构建DataSource.Factory对象，即在DataSource.Factory的create方法中直接实例化一个DataSource对象 并返回即可。根据分页机制的不同Paging一共提供了三种DataSource。  
+
 1).PositionalDataSource   
 适用于在目标数据源数据量固定的情况下，且从任意位置开始往后取固定条数的分页机制。通常服务器需要两个参数start参数表示任意开始位置，count参数表示想后取count个数据。    
 自定义一个类并继承PositionalDataSource<T>，实现loadInitial方法首次加载第一页调用的方法，在通过网络库将数据请求成功后通过callback.onResult(服务返回的数据集合,start数据起始位置，服务器总数据量)将数据返回给PagedList。实现loadRange方法加载下一页时调用的方法，通过网络库请求成功后通过callback.onResult(服务返回的数据集合)将数据返回给PagedList，用网络库请求下一页时的start起始位置参数直接从此方法的LoadRangeParams参数params.startPosition获取即可，Paging内部会自己维护。  
@@ -185,6 +189,7 @@ getKey方法并根据具体业务，比如以数据id为key则返回 数据对�
 
 BoundaryCallback整体流程：    
 首次加载页面如数据库有数据则直接将数据库数据返回给PageList进行渲染，如数据库为空首次加载数据会自动调用BoundaryCallback的onZeroItemsLoaded方法，在该方法内通过网络请求库加载数据，请求成功后将数据插入到room数据库中。当向上滑动页面加载下一页时，如数据库有下一页数据则直接将数据返回给PageList，如果数据库没有下一页数据会自动调用BoundaryCallback的onItemAtEndLoaded方法，方法内的参数为上一页最末尾的数据对象，在该方法内请求数据并在请求成功后将数据插入到room数据库。当向下滑动刷新数据时，首先手动清空数据库，由于数据库发生了变化数据库中没有数据了，PageList又会通知BoundaryCallback的onZeroItemsLoaded方法加载数据就回到了首次加载页面的状态。由于数据库是页面的唯一数据源，页面订阅了数据库的变化，所以当数据库中的数据发生变化时会直接反映到页面上。    
+
 使用BoundaryCallback时由于将数据库作为页面的数据源，所以要先创建DataBase数据库类、Dao接口类、以及Entity数据表类，和其它情况下封装Dao接口的Query查询方法不同，由于和Paging联合使用所以将查询方法的返回值定义成DataSource.Factory<Integer,Entry表>，这是因为Room组件对Paging组件提供的原生的支持，Dao的其它注解方法和普通情况下一样。然后自定义一个继承UserBoundaryCallback<Entry表>的类，实现onZeroItemsLoaded和onItemAtEndLoaded方法，BoundaryCallback便定义完毕，最后在ViewModel中实例化LiveData<PagedList<Entry表>>对象时是通过：    
 new LivePagedListBuilder<>(database.entry表dao().query对应方法,每页数据条数).setBoundaryCallback(new 自定义BoundaryCallback()).build()完成实例化对象，供外部使用和观察数据变化。也可以在ViewModel中添加清除数据库的方法，当在页面下拉刷新时清空数据库，触发BoundaryCallback重新加载数据并将数据通知给Activity，Adapter和Activity中的代码和其它三种分页机制一样。
 
