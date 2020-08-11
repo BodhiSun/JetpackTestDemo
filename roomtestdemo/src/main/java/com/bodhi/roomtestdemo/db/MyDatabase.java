@@ -30,7 +30,8 @@ public abstract class MyDatabase extends RoomDatabase {
                     context.getApplicationContext(),
                     MyDatabase.class, DATABASE_NAME)
                     .fallbackToDestructiveMigration()//升级异常处理方案，当没有对应的版本升级策略时防止崩溃，但数据仍会丢失
-                    .addMigrations(MigrationManager.MIGRATION_1_2, MigrationManager.MIGRATION_2_3, MigrationManager.MIGRATION_1_3,MigrationManager.MIGRATION_1_4).build();
+                    .addMigrations(MigrationManager.MIGRATION_1_2, MigrationManager.MIGRATION_2_3, MigrationManager.MIGRATION_1_3,MigrationManager.MIGRATION_1_4)
+                    .build();
         }
         return databaseInstance;
     }

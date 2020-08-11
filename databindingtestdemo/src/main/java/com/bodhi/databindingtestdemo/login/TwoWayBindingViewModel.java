@@ -31,14 +31,13 @@ public class TwoWayBindingViewModel extends BaseObservable {
 
     //当布局中用户修改userName对应数据 会自动调用set方法
     public void setUserName(String userName){
-        Log.e("bindingadapter","setUserName");
         //对传递的参数进行判断 防止布局-model循环调用
-        if(userName!=null && !userName.equals(loginModel.userName)){
+//        if(userName!=null && !userName.equals(loginModel.userName)){
             Log.e("bindingadapter","setUserName   userName:"+userName);
             loginModel.userName = userName;
             //同时可以处理一些与业务相关的逻辑
             notifyPropertyChanged(BR.userName);
-        }
+//        }
     }
 
 
