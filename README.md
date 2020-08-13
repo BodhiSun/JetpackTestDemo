@@ -213,6 +213,11 @@ ViewModel层和Model层之间多了一个Repository存储区层，这是因为�
 ###### MyApplication：用于初始化数据和网络库对象
 ###### 项目中Jetpack架构组合为：ViewModel+LiveData+DataBinding+Room
 
+### 项目案例2：Word单Room数据源添加和查询展示(mvvmword 源于Google Codelabs的一个项目)
+&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_structure_detail.png" height="394" />&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_code_structure_detail.png" height="394" />  
+&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_list.png" height="394"/>&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_add.png" height="394" />   
+上图为项目设计的架构图、完成后代码架构图、以及项目运行后的效果图
+
 
 
 
