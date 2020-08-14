@@ -200,7 +200,7 @@ new LivePagedListBuilder<>(database.entry表dao().query对应方法,每页数据
       
 ViewModel层和Model层之间多了一个Repository存储区层，这是因为项目中通常需要考虑到缓存数据，所以数据即来源于持久性数据模型即本地数据库和又来源于远程后端数据源，增加一个存储区Repository层用来处理本地数据和网络数据之间的业务逻辑，让ViewModel层仅依赖于Repository提供数据，而不用关心数据的具体来源，这既是Repository存储区层的意义。   
 
-### 项目案例1：Github用户个人信息展示(mvvmgithub)
+### 项目案例1：Github用户个人信息展示(mvvmgithub 源于Android Jetpack应用指南书中的项目)
 &emsp;&emsp;&emsp;&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/github_userinfo.png" height="394" />&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/github_userinfo_architecture.png" height="394" />   
 上图为项目运行后的效果图和项目工程结构图，结合工程结构图每个包的含义如下：  
 ###### api：定义Api接口，封装Retrofit网络请求框架，通过Retrofit请求Github的API接口    
@@ -211,12 +211,14 @@ ViewModel层和Model层之间多了一个Repository存储区层，这是因为�
 ###### viewmodel：负责获取Repository层的数据 并包装返回给View层    
 ###### MainActivity：View层,使用了DataBinding组件将数据直接交给布局文件进行处理展示   
 ###### MyApplication：用于初始化数据和网络库对象
-###### 项目中Jetpack架构组合为：ViewModel+LiveData+DataBinding+Room
+###### 项目中Jetpack架构组合为：ViewModel+LiveData+DataBinding+Room   
+
 
 ### 项目案例2：Word单Room数据源添加和查询展示(mvvmword 源于Google Codelabs的一个项目)
 &emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_structure_detail.png" height="394" />&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_code_structure_detail.png" height="394" />  
-&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_list.png" height="394"/>&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_add.png" height="394" />   
-上图为项目设计的架构图、完成后代码架构图、以及项目运行后的效果图
+&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_list.png" height="394"/>&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_add.png" height="394" />&emsp;&emsp;<img src="https://github.com/BodhiSun/JetpackTestDemo/blob/master/image/word_code.png" height="394" />   
+上图为项目设计的架构图、完成后代码架构图、以及项目运行后的效果图和代码截图
+###### 项目中Jetpack架构组合为：ViewModel+LiveData+Room   
 
 
 
